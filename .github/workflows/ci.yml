@@ -61,13 +61,9 @@ jobs:
       - name: Demarrer MySQL avec le script SQL du depot
         run: docker compose up -d --wait
 
-      # validate fait echouer le demarrage si l'entite et la table divergent :
-      # c'est la seule porte qui confronte le mapping au vrai script SQL.
-      - name: Lancer l'archive contre MySQL
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3307/student_tracker
-          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
-        run: java -jar target/cruddemo-0.0.1-SNAPSHOT.jar
+      # La seule porte qui confronte le mapping et le CRUD au vrai script SQL.
+      - name: Jouer toutes les actions contre MySQL
+        run: scripts/verifier-crud.sh
 
   secrets:
     name: Balayage de secrets sur tout l'historique
