@@ -90,4 +90,23 @@ class StudentDAOTest {
 
 		assertThat(studentDAO.findById(student.getId()).getFirstName()).isEqualTo("John");
 	}
+
+	@Test
+	void deleteRemovesTheRow() {
+		Student student = new Student("Paul", "Doe", "paul@test.com");
+		studentDAO.save(student);
+
+		studentDAO.delete(student.getId());
+
+		assertThat(studentDAO.findById(student.getId())).isNull();
+	}
+
+	@Test
+	void deleteOfAnUnknownIdDoesNothing() {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+
+		studentDAO.delete(999);
+
+		assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM student", Integer.class)).isEqualTo(1);
+	}
 }
