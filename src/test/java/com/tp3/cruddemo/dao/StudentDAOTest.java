@@ -51,4 +51,14 @@ class StudentDAOTest {
 	void findByIdReturnsNullWhenTheIdDoesNotExist() {
 		assertThat(studentDAO.findById(999)).isNull();
 	}
+
+	@Test
+	void findAllIsSortedByLastName() {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+		studentDAO.save(new Student("Bonita", "Applebum", "bonita@test.com"));
+		studentDAO.save(new Student("Mary", "Public", "mary@test.com"));
+
+		assertThat(studentDAO.findAll()).extracting(Student::getLastName)
+				.containsExactly("Applebum", "Doe", "Public");
+	}
 }
