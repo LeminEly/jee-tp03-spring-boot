@@ -1,0 +1,21 @@
+# Copier en .gitattributes à la racine du dépôt.
+# Normalise les fins de ligne : un poste Windows ne doit pas produire un diff
+# entier sur un fichier qu'il n'a pas modifié.
+
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.bat  text eol=crlf
+
+*.png  binary
+*.jpg  binary
+*.webp binary
+*.avif binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
+*.ico  binary
+
+# Fichiers générés : exclus des statistiques et repliés dans les revues.
+*.lock          linguist-generated=true
+package-lock.json linguist-generated=true

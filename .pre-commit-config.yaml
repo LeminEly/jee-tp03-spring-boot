@@ -1,0 +1,48 @@
+# Controles de pre-commit du projet.
+# Installer : pre-commit install && pre-commit install --hook-type commit-msg
+#
+# Les memes controles sont rejoues en integration continue, dans le travail
+# « qualite » de .github/workflows/ci.yml : contourner localement ne gagne rien.
+# Jamais de --no-verify.
+#
+# Ecart assume par rapport au modele du socle : no-commit-to-branch est retire.
+# Le TP se fait par un auteur unique sur une branche unique, et l'historique
+# lineaire par exercice est lui-meme un livrable.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: detect-private-key
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: message-de-commit
+        name: convention du message de commit
+        entry: scripts/hook-commit-msg.sh
+        language: script
+        stages: [commit-msg]
+
+      - id: maven-test
+        name: mvnw test (compilation + tests)
+        entry: scripts/hook-maven-test.sh
+        language: script
+        pass_filenames: false
+        files: '^(src/.*\.java|pom\.xml|src/main/resources/application\.properties)$'

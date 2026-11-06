@@ -1,0 +1,109 @@
+name: CI
+
+# Les trois travaux rejouent en integration ce que les controles de pre-commit
+# font en local : qualite, compilation et tests, balayage de secrets. Un
+# contournement local n'echappe donc a rien.
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualite:
+    name: Controles de pre-commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Installer pre-commit
+        run: pipx install pre-commit
+
+      - name: Rejouer tous les controles
+        run: pre-commit run --all-files --show-diff-on-failure
+
+  build:
+    name: Compilation, tests et demarrage sur MySQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # Les tests tournent sur H2. Ils ne prouvent donc rien sur MySQL, d'ou
+      # l'etape suivante.
+      - name: Compiler et tester
+        run: ./mvnw -B verify
+
+      - name: Verifier que l'archive existe
+        run: test -f target/cruddemo-0.0.1-SNAPSHOT.jar
+
+      - name: Demarrer MySQL avec le script SQL du depot
+        run: docker compose up -d --wait
+
+      # validate fait echouer le demarrage si l'entite et la table divergent :
+      # c'est la seule porte qui confronte le mapping au vrai script SQL.
+      - name: Lancer l'archive contre MySQL
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3307/student_tracker
+          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+        run: java -jar target/cruddemo-0.0.1-SNAPSHOT.jar
+
+  secrets:
+    name: Balayage de secrets sur tout l'historique
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Version et empreinte verifiees le 2026-11-01 contre le fichier
+      # checksums.txt publie a cote de l'archive dans la meme version.
+      GITLEAKS_VERSION: 8.24.3
+      GITLEAKS_SHA256: 9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # Le binaire officiel plutot que gitleaks/gitleaks-action. L'action
+      # derive une plage de commits de l'evenement de poussee et demande
+      # <premier commit>^..HEAD, ce qui n'existe pas quand la poussee contient
+      # le commit racine : git refuse la revision et le travail echoue. Mesure
+      # sur ce depot au premier envoi de development.
+      - name: Installer gitleaks, empreinte verifiee
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSLo "$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
+          echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum -c -
+          tar -xzf "$archive" gitleaks
+          ./gitleaks version
+
+      # gitleaks a renomme « detect » en « git » au fil des versions, sans
+      # retirer l'ancien nom tout de suite. On emploie celui que le binaire
+      # installe accepte, plutot que de parier sur l'un des deux.
+      - name: Balayer tout l'historique
+        run: |
+          if ./gitleaks git --help >/dev/null 2>&1; then
+            ./gitleaks git . --redact --verbose --exit-code 1
+          else
+            ./gitleaks detect --source . --redact --verbose --exit-code 1
+          fi

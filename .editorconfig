@@ -1,0 +1,28 @@
+# Copier en .editorconfig à la racine du dépôt.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 100
+
+[*.{py,go}]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
+
+# Le code genere par Spring Initializr est indente a la tabulation. On s'aligne
+# dessus plutot que de reformater : le diff resterait illisible pour rien.
+[*.{java,xml}]
+indent_style = tab
+
+[pom.xml]
+indent_style = tab

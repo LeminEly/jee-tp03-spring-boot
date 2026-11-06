@@ -1,0 +1,4 @@
+# Version d'execution du projet, alignee sur celle de l'integration continue.
+# Activer : sdk env    (ou automatiquement si sdkman_auto_env=true)
+# Java 25 est impose par l'enonce du TP. Un JRE ne suffit pas : il faut javac.
+java=25.0.5.0+8-tem

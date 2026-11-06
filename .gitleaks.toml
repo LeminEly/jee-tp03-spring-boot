@@ -1,0 +1,21 @@
+# Copier en .gitleaks.toml à la racine du dépôt.
+title = "Configuration de balayage des secrets"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Exclusions validées. Toute ligne ajoutée ici se justifie en revue."
+paths = [
+  # Modèle d'environnement : ne contient que des noms de variables, sans valeur.
+  '''\.env\.example''',
+  # Fichier de configuration du balayage lui-même.
+  '''\.gitleaks\.toml''',
+  # Verrous de dépendances : empreintes d'intégrité, pas des secrets.
+  '''package-lock\.json''',
+  '''poetry\.lock''',
+]
+
+# Rappel : le balayage tourne sur TOUT l'historique, pas seulement sur le
+# dernier commit. Un secret retiré au commit suivant reste dans l'historique et
+# reste valide tant qu'il n'est pas révoqué.

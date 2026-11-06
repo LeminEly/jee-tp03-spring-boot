@@ -1,0 +1,32 @@
+# La base de demonstration du TP, isolee de tout le reste du poste.
+#   docker compose up -d --wait     demarrer
+#   docker compose down -v          tout effacer, donnees comprises
+#
+# Port 3307 et non 3306 : sur le poste de developpement, 3306 est deja pris par
+# la base d'un autre projet. Une installation MySQL ordinaire sur 3306 n'a pas
+# besoin de ce fichier : voir le README.
+#
+# Image epinglee par empreinte : une etiquette se redeplace, une empreinte non.
+name: jee-tp03
+
+services:
+  mysql:
+    image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: student_tracker
+      MYSQL_USER: springstudent
+      MYSQL_PASSWORD: springstudent
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - donnees:/var/lib/mysql
+      - ./00-starter-sql-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=springstudent mysql -h 127.0.0.1 -u springstudent -e 'SELECT 1 FROM student_tracker.student LIMIT 1'"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+volumes:
+  donnees:

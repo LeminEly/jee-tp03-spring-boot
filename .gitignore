@@ -1,0 +1,54 @@
+# Copier en .gitignore à la racine du dépôt.
+# Principe : ce qui n'est pas le produit ne part jamais. En cas de doute, exclure.
+
+# Secrets et environnement
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+keys/
+secrets/
+
+# Dépendances et artefacts
+node_modules/
+dist/
+build/
+out/
+.next/
+.turbo/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+target/
+
+# Caches d'outils
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+coverage/
+.coverage
+*.log
+
+# Environnements locaux et sauvegardes
+docker-compose.override.yml
+*.sqlite
+*.sqlite3
+*.dump
+*.sql.gz
+backups/
+
+# Outillage de poste
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Fichiers de travail : ils vivent hors du dépôt, dans travail/
+scratch/
+tmp/
+*.tmp
