@@ -78,4 +78,16 @@ class StudentDAOTest {
 
 		assertThat(studentDAO.findByLastName("x' OR '1'='1")).isEmpty();
 	}
+
+	@Test
+	void updateWritesTheChangeOfADetachedStudent() {
+		Student student = new Student("Paul", "Doe", "paul@test.com");
+		studentDAO.save(student);
+
+		Student detached = studentDAO.findById(student.getId());
+		detached.setFirstName("John");
+		studentDAO.update(detached);
+
+		assertThat(studentDAO.findById(student.getId()).getFirstName()).isEqualTo("John");
+	}
 }
