@@ -61,4 +61,21 @@ class StudentDAOTest {
 		assertThat(studentDAO.findAll()).extracting(Student::getLastName)
 				.containsExactly("Applebum", "Doe", "Public");
 	}
+
+	@Test
+	void findByLastNameKeepsOnlyThatName() {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+		studentDAO.save(new Student("John", "Doe", "john@test.com"));
+		studentDAO.save(new Student("Mary", "Public", "mary@test.com"));
+
+		assertThat(studentDAO.findByLastName("Doe")).extracting(Student::getFirstName)
+				.containsExactlyInAnyOrder("Paul", "John");
+	}
+
+	@Test
+	void aNamedParameterTreatsAnInjectionAttemptAsAPlainValue() {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+
+		assertThat(studentDAO.findByLastName("x' OR '1'='1")).isEmpty();
+	}
 }

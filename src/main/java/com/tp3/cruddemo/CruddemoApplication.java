@@ -19,7 +19,7 @@ public class CruddemoApplication {
 	public CommandLineRunner commandLineRunner(StudentDAO studentDAO) {
 		return runner -> {
 			createSeveralStudents(studentDAO);
-			readStudents(studentDAO);
+			findStudentsByLastName(studentDAO);
 		};
 	}
 
@@ -29,10 +29,8 @@ public class CruddemoApplication {
 		studentDAO.save(new Student("Bonita", "Applebum", "bonita@test.com"));
 	}
 
-	private void readStudents(StudentDAO studentDAO) {
-		List<Student> theStudents = studentDAO.findAll();
-		for (Student s : theStudents) {
-			System.out.println(s);
-		}
+	private void findStudentsByLastName(StudentDAO studentDAO) {
+		List<Student> theStudents = studentDAO.findByLastName("Doe");
+		theStudents.forEach(System.out::println);
 	}
 }
