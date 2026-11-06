@@ -17,12 +17,25 @@ public class CruddemoApplication {
 	@Bean
 	public CommandLineRunner commandLineRunner(StudentDAO studentDAO) {
 		return runner -> {
-			deleteStudent(studentDAO);
+			createSeveralStudents(studentDAO);
+			updateEmails(studentDAO);
+			deleteAllStudents(studentDAO);
 		};
 	}
 
-	private void deleteStudent(StudentDAO studentDAO) {
-		studentDAO.delete(1);
-		System.out.println("After delete, findById(1) = " + studentDAO.findById(1));
+	private void createSeveralStudents(StudentDAO studentDAO) {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+		studentDAO.save(new Student("Mary", "Public", "mary@test.com"));
+		studentDAO.save(new Student("Bonita", "Applebum", "bonita@test.com"));
+	}
+
+	private void updateEmails(StudentDAO studentDAO) {
+		int n = studentDAO.updateEmailByLastName("unknown@test.com", "Doe");
+		System.out.println("Updated row count: " + n);
+	}
+
+	private void deleteAllStudents(StudentDAO studentDAO) {
+		int n = studentDAO.deleteAll();
+		System.out.println("Deleted row count: " + n);
 	}
 }

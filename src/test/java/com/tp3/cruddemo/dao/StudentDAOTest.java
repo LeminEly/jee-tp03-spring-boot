@@ -109,4 +109,24 @@ class StudentDAOTest {
 
 		assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM student", Integer.class)).isEqualTo(1);
 	}
+
+	@Test
+	void deleteAllReturnsTheNumberOfDeletedRows() {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+		studentDAO.save(new Student("Mary", "Public", "mary@test.com"));
+
+		assertThat(studentDAO.deleteAll()).isEqualTo(2);
+		assertThat(studentDAO.findAll()).isEmpty();
+	}
+
+	@Test
+	void bulkUpdateChangesOnlyTheMatchingRows() {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+		studentDAO.save(new Student("Mary", "Public", "mary@test.com"));
+
+		assertThat(studentDAO.updateEmailByLastName("unknown@test.com", "Doe")).isEqualTo(1);
+
+		assertThat(studentDAO.findByLastName("Doe").get(0).getEmail()).isEqualTo("unknown@test.com");
+		assertThat(studentDAO.findByLastName("Public").get(0).getEmail()).isEqualTo("mary@test.com");
+	}
 }

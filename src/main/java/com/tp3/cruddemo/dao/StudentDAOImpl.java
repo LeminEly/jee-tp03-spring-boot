@@ -60,4 +60,19 @@ public class StudentDAOImpl implements StudentDAO {
 			entityManager.remove(theStudent);
 		}
 	}
+
+	@Override
+	@Transactional
+	public int deleteAll() {
+		return entityManager.createQuery("DELETE FROM Student").executeUpdate();
+	}
+
+	@Override
+	@Transactional
+	public int updateEmailByLastName(String theEmail, String theLastName) {
+		return entityManager.createQuery("UPDATE Student SET email = :em WHERE lastName = :ln")
+				.setParameter("em", theEmail)
+				.setParameter("ln", theLastName)
+				.executeUpdate();
+	}
 }
