@@ -2,6 +2,8 @@ package com.tp3.cruddemo;
 
 import com.tp3.cruddemo.dao.StudentDAO;
 import com.tp3.cruddemo.entity.Student;
+import com.tp3.cruddemo.service.StudentService;
+import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +17,7 @@ public class CruddemoApplication {
 	}
 
 	@Bean
-	public CommandLineRunner commandLineRunner(StudentDAO studentDAO) {
+	public CommandLineRunner commandLineRunner(StudentDAO studentDAO, StudentService studentService) {
 		return args -> {
 			String action = (args.length > 0) ? args[0] : "read";
 			switch (action) {
@@ -26,6 +28,8 @@ public class CruddemoApplication {
 				case "create-many" -> createSeveralStudents(studentDAO);
 				case "update-emails" -> updateEmails(studentDAO);
 				case "delete-all" -> deleteAllStudents(studentDAO);
+				case "find-named" -> findByLastNameNamed(studentDAO);
+				case "enroll-batch" -> enrollBatch(studentService, studentDAO);
 				default -> System.out.println("Action inconnue: " + action);
 			}
 		};
@@ -84,5 +88,23 @@ public class CruddemoApplication {
 	private void deleteAllStudents(StudentDAO studentDAO) {
 		int n = studentDAO.deleteAll();
 		System.out.println("Deleted row count: " + n);
+	}
+
+	private void findByLastNameNamed(StudentDAO studentDAO) {
+		System.out.println("Named query Student.findByLastName(\"Doe\"):");
+		studentDAO.findByLastNameNamed("Doe").forEach(System.out::println);
+	}
+
+	private void enrollBatch(StudentService studentService, StudentDAO studentDAO) {
+		int before = studentDAO.findAll().size();
+		List<Student> batch = List.of(
+				new Student("Ada", "Lovelace", "ada@test.com"),
+				new Student("Nobody", null, "nobody@test.com"));
+		try {
+			studentService.enrollAll(batch);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Batch refused: " + e.getMessage());
+		}
+		System.out.println("Rows before: " + before + ", rows after: " + studentDAO.findAll().size());
 	}
 }

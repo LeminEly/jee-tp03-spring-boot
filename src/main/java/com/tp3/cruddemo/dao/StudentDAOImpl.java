@@ -75,4 +75,11 @@ public class StudentDAOImpl implements StudentDAO {
 				.setParameter("ln", theLastName)
 				.executeUpdate();
 	}
+
+	@Override
+	public List<Student> findByLastNameNamed(String theLastName) {
+		return entityManager.createNamedQuery("Student.findByLastName", Student.class)
+				.setParameter("theData", theLastName)
+				.getResultList();
+	}
 }

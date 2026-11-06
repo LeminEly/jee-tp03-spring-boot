@@ -129,4 +129,13 @@ class StudentDAOTest {
 		assertThat(studentDAO.findByLastName("Doe").get(0).getEmail()).isEqualTo("unknown@test.com");
 		assertThat(studentDAO.findByLastName("Public").get(0).getEmail()).isEqualTo("mary@test.com");
 	}
+
+	@Test
+	void theNamedQueryGivesTheSameResultAsTheInlineOne() {
+		studentDAO.save(new Student("Paul", "Doe", "paul@test.com"));
+		studentDAO.save(new Student("Mary", "Public", "mary@test.com"));
+
+		assertThat(studentDAO.findByLastNameNamed("Doe")).extracting(Student::getId)
+				.containsExactlyElementsOf(studentDAO.findByLastName("Doe").stream().map(Student::getId).toList());
+	}
 }

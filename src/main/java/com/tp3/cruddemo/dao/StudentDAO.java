@@ -20,4 +20,6 @@ public interface StudentDAO {
 	int deleteAll();
 
 	int updateEmailByLastName(String theEmail, String theLastName);
+
+	List<Student> findByLastNameNamed(String theLastName);
 }
