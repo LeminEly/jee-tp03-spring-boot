@@ -38,4 +38,17 @@ class StudentDAOTest {
 		assertThat(jdbc.queryForObject("SELECT first_name FROM student WHERE id = ?", String.class,
 				student.getId())).isEqualTo("Paul");
 	}
+
+	@Test
+	void findByIdReturnsTheStudent() {
+		Student student = new Student("Paul", "Doe", "paul@test.com");
+		studentDAO.save(student);
+
+		assertThat(studentDAO.findById(student.getId()).getFirstName()).isEqualTo("Paul");
+	}
+
+	@Test
+	void findByIdReturnsNullWhenTheIdDoesNotExist() {
+		assertThat(studentDAO.findById(999)).isNull();
+	}
 }
